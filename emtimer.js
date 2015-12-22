@@ -6,11 +6,29 @@ window.onerror = function(msg, url, line, column, e) {
   // window.opener points to the test harness window if one exists. If a test page is opened outside the harness, window.opener
   // does not exist and as a result we don't auto-close on error (but show the error to user).
   // Also ignore InvalidStateError errors because those can occur in IndexedDB operations from file:// URLs, which we don't really care about.
-  if (window.opener && msg.indexOf('InvalidStateError') == -1) {
-    var testResults = {
-      result: 'ERROR',
-      error: msg
-    };
+  if (window.opener) {
+    var testResults = null;
+    if (msg == 'uncaught exception: exit') { // Normal exit from test
+      var timeEnd = performance.realNow();
+      var duration = timeEnd - Module['timeStart'];
+      var cpuIdle = (duration - accumulatedCpuTime) / duration;
+      var fps = numFramesToRender * 1000.0 / duration;
+      testResults = {
+        result: 'PASS',
+        totalTime: Math.round(duration),
+        wrongPixels: 0,
+        cpuTime: Math.round(accumulatedCpuTime),
+        cpuIdle: 0,
+        fps: 0,
+        pageLoadTime: pageLoadTime,
+        numStutterEvents: 0
+      };
+    } else if (msg.indexOf('InvalidStateError') == -1) {
+      testResults = {
+        result: 'ERROR',
+        error: msg
+      };
+    }
     window.opener.postMessage(testResults, "*");
     window.onbeforeunload = null; // Don't call any application onbeforeunload handlers as a response to window.close() below.
     window.close();
@@ -50,19 +68,21 @@ var numStutterEvents = 0;
 // Mock performance.now() and Date.now() to be deterministic.
 performance.realNow = performance.now;
 if (injectingInputStream || recordingInputStream) {
-  // TODO: Make this a parameter of the test that is passed in, instead of hardcoding names here.
-  var needsFakeMonotonouslyIncreasingTimer = window.location.href.indexOf('ShooterGame') != -1 || window.location.href.indexOf('StrategyGame') != -1 || window.location.href.indexOf('osmos') != -1 || window.location.href.indexOf('Soul-live') != -1;
+  if (window.location.href.indexOf('MathGeoLib') == -1) {
+    // TODO: Make this a parameter of the test that is passed in, instead of hardcoding names here.
+    var needsFakeMonotonouslyIncreasingTimer = window.location.href.indexOf('ShooterGame') != -1 || window.location.href.indexOf('StrategyGame') != -1 || window.location.href.indexOf('osmos') != -1 || window.location.href.indexOf('Soul-live') != -1;
 
-  if (needsFakeMonotonouslyIncreasingTimer) {
-    Date.now = function() { return fakedTime++; }
-    performance.now = function() { return fakedTime++; }
-  } else {
-    Date.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
-    performance.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
+    if (needsFakeMonotonouslyIncreasingTimer) {
+      Date.now = function() { return fakedTime++; }
+      performance.now = function() { return fakedTime++; }
+    } else {
+      Date.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
+      performance.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
+    }
+    // This is an unattended run, don't allow window.alert()s to intrude.
+    window.alert = function(msg) { console.error('window.alert(' + msg + ')'); }
+    window.confirm = function(msg) { console.error('window.confirm(' + msg + ')'); return true; }
   }
-  // This is an unattended run, don't allow window.alert()s to intrude.
-  window.alert = function(msg) { console.error('window.alert(' + msg + ')'); }
-  window.confirm = function(msg) { console.error('window.confirm(' + msg + ')'); return true; }
 }
 
 // XHRs in the expected render output image, always 'reference.png' in the root directory of the test.
