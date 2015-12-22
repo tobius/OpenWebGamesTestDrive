@@ -119,7 +119,7 @@
     { name: "PhysicsStressTest", url: "2015-10-16-emunittest_0.4-PhysicsStressTest-Urho3D_1.4_e1.34.12-release-prof/12_PhysicsStressTest.html", size: 23150235, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 1200 },
     { name: "PhysicsStressTest-SIMD", url: "2015-10-16-emunittest_0.4-PhysicsStressTestSIMD-Urho3D_1.4_e1.34.12-release-prof/12_PhysicsStressTest.html", size: 23194532, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 1200 },
     { name: "SkeletalAnimation", url: "2015-10-16-emunittest_0.4-SkeletalAnimation-Urho3D_1.4_e1.34.12-release-prof/06_SkeletalAnimation.html", size: 23174717, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 600 },
-    { name: "SkeletalAnimation-SIMD", url: "2015-10-16-emunittest_0.4-SkeletalAnimationSIMD-Urho3D_1.4_e1.34.12-release-prof/06_SkeletalAnimation.html", size: 23169869, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 600 },
+    { name: "SkeletalAnimation-SIMD-pthreads", url: "2015-12-22-SkeletalAnimation-SIMD-pthreads-Urho3D_1.5_e1.35.14-release-prof/06_SkeletalAnimation.html", size: 40868333, compiler: 'e1.35.14', engine: 'Urho3D 1.5', date: '2015-12-2', noVsync: true, interactive: true, available: true, length: 600 },
     { name: "10kCubes", url: "2015-08-27-10kCubes-release-prof/10kCubes.html?/objects&10000", size: 3736784, compiler: 'e1.34.6', engine: 'gfxapi', date: '2015-08-27', noVsync: true, interactive: true, length: 500 }
   ];
 
@@ -482,8 +482,10 @@
         do { a = a + c | 0; b = b + a | 0; c = c + b | 0; a = a + c | 0; b = b + a | 0; c = c + b | 0; a = a + c | 0; b = b + a | 0; c = c + b | 0; i = i + 1 | 0; } while((i | 0) != 1048576);
         t1 = +performance_now(); i32[0>>2] = c; return t1 - t0;
       }
+
       // Inside asm.js module
       function doesCanonicalizeNans() {
+        var x = 0;
         var f = Math_fround(0.0);
         var d = 0.0;
         var canonicalizes = 0;
