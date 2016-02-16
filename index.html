@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 </head>
 <body style="font-family: jaf-bernino-sans, \'Lucida Grande\', \'Lucida Sans Unicode\', \'Lucida Sans\', Geneva, Verdana, sans-serif;">
-  <h2>Open Web Games Test Harness</h2>
+  <h2>OpenWebGames Test Drive</h2>
   <pre id='version'></pre>
   This page contains different web games repurposed as browser benchmarks.
   <p style='margin-bottom: 0px;'><img style='width: 24px; height: auto; vertical-align: text-top;' src='info_icon.png'><b>System Information:</b>
@@ -109,7 +109,7 @@
   var typedArraysAreLittleEndian = undefined;
   var supportsMathFround = typeof Math.fround !== 'undefined';
 
-  var testVersion = 'OpenWebGamesTestHarness-0.9';
+  var testVersion = 'OpenWebGamesTestDrive-0.9';
   document.getElementById('version').innerHTML = testVersion;
   var tests = [
     { name: "AngryBots", url: "2015-08-28-emunittest_0.4-AngryBots-u5.1.3f1_hg-e1.34.6-release-prof/index.html", size: 113673082, compiler: 'e1.34.6', engine: 'Unity 5.1.3f1_hg', date: '2015-08-28', noVsync: true, interactive: true},
@@ -117,6 +117,7 @@
     { name: "SpaceShooter", url: "2015-08-29-emunittest_0.4-SpaceShooter-u5.1.3f1_hg-e1.34.6-release-prof/index.html", size: 44100129, compiler: 'e1.34.6', engine: 'Unity 5.1.3f1_hg', date: '2015-08-29', noVsync: true, interactive: true },
     { name: "2DPlatformer", url: "2015-08-29-emunittest_0.4-2DPlatformer-u5.1.3f1_hg-e1.34.6-release-prof/index.html", size: 65731609, compiler: 'e1.34.6', engine: 'Unity 5.1.3f1_hg', date: '2015-08-29', noVsync: false, interactive: true },
     { name: "Unity AI Benchmark-pthreads", url: "2015-05-22-WebGLBenchmark-pthreads-u5.1.0/index.html", size: 99658449, compiler: 'e1.32.4', engine: 'Unity 5.1.0_hg', date: '2015-05-22', noVsync: true, interactive: false, length: 1200 },
+    { name: "Heroes of Paragon", url: "2016-01-27-HoPWebGLDemo/index.html", size: 136363563, compiler: 'Unity 5.2', engine: 'Unity 5.2', date: '2016-01-27', noVsync: true, interactive: true, available: true },
     { name: "PhysicsStressTest", url: "2015-10-16-emunittest_0.4-PhysicsStressTest-Urho3D_1.4_e1.34.12-release-prof/12_PhysicsStressTest.html", size: 23150235, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 1200 },
     { name: "PhysicsStressTest-SIMD", url: "2015-10-16-emunittest_0.4-PhysicsStressTestSIMD-Urho3D_1.4_e1.34.12-release-prof/12_PhysicsStressTest.html", size: 23194532, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 1200 },
     { name: "SkeletalAnimation", url: "2015-10-16-emunittest_0.4-SkeletalAnimation-Urho3D_1.4_e1.34.12-release-prof/06_SkeletalAnimation.html", size: 23174717, compiler: 'e1.34.12', engine: 'Urho3D 1.4', date: '2015-10-16', noVsync: true, interactive: true, available: true, length: 600 },
