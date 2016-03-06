@@ -88,7 +88,8 @@ var loadScene = function (name, incremental, sceneLocation, then) {
 
     BABYLON.SceneLoader.ForceFullSceneLoadingForIncremental = true;
 
-    engine.resize();
+//    engine.resize();
+    engine.setSize(1366, 768); // XXX EMUNITTEST: Force rendering to fixed resolution to make the results more apples to apples between different hardware.
 
     var dlCount = 0;
     BABYLON.SceneLoader.Load(sceneLocation + name + "/", name + incremental + ".babylon", engine, function (newScene) {
