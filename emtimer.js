@@ -70,11 +70,17 @@ performance.realNow = performance.now;
 if (injectingInputStream || recordingInputStream) {
   if (window.location.href.indexOf('MathGeoLib') == -1) {
     // TODO: Make this a parameter of the test that is passed in, instead of hardcoding names here.
-    var needsFakeMonotonouslyIncreasingTimer = window.location.href.indexOf('ShooterGame') != -1 || window.location.href.indexOf('StrategyGame') != -1 || window.location.href.indexOf('osmos') != -1 || window.location.href.indexOf('Soul-live') != -1;
+    var needsFakeMonotonouslyIncreasingTimer = window.location.href.indexOf('ShooterGame') != -1 || window.location.href.indexOf('SunTemple') != -1 || window.location.href.indexOf('StrategyGame') != -1 || window.location.href.indexOf('osmos') != -1 || window.location.href.indexOf('Soul-live') != -1;
 
     if (needsFakeMonotonouslyIncreasingTimer) {
-      Date.now = function() { return fakedTime++; }
-      performance.now = function() { return fakedTime++; }
+      if (window.location.href.indexOf('SunTemple') != -1) {
+        // For SunTemple, need to slow down time considerably for not to run too fast.
+        Date.now = function() { fakedTime += 0.05; return fakedTime; }
+        performance.now = function() { fakedTime += 0.05; return fakedTime; }
+      } else {
+        Date.now = function() { return ++fakedTime; }
+        performance.now = function() { return ++fakedTime; }
+      }
     } else {
       Date.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
       performance.now = function() { return referenceTestFrameNumber * 1000.0 / 60.0; }
@@ -203,7 +209,7 @@ function simulateMouseEvent(eventType, x, y, button) {
                    button, null);
 
   // TODO: Don't hardcode this, but make it a parameter of the test, or find a way to autodetect.
-  var testUsesEmscriptenHTML5API = window.location.href.indexOf('PrimeWorldDefenders') == -1 && window.location.href.indexOf('StrategyGame') == -1 && window.location.href.indexOf('JackLumber') == -1 && window.location.href.indexOf('DeadTrigger') == -1;
+  var testUsesEmscriptenHTML5API = window.location.href.indexOf('PrimeWorldDefenders') == -1 && window.location.href.indexOf('SunTemple') == -1 && window.location.href.indexOf('StrategyGame') == -1 && window.location.href.indexOf('JackLumber') == -1 && window.location.href.indexOf('DeadTrigger') == -1;
 
   // Dispatch to Emscripten's html5.h API:
   if (testUsesEmscriptenHTML5API && typeof JSEvents !== 'undefined' && JSEvents.eventHandlers && JSEvents.eventHandlers.length > 0) {
@@ -239,7 +245,7 @@ function simulateKeyEvent(eventType, keyCode, charCode) {
 
 
   // TODO: Don't hardcode this, but make it a parameter of the test, or find a way to autodetect.
-  var testUsesEmscriptenHTML5API = window.location.href.indexOf('DeadTrigger') == -1;
+  var testUsesEmscriptenHTML5API = window.location.href.indexOf('PrimeWorldDefenders') == -1 && window.location.href.indexOf('SunTemple') == -1 && window.location.href.indexOf('StrategyGame') == -1 && window.location.href.indexOf('JackLumber') == -1 && window.location.href.indexOf('DeadTrigger') == -1;
 
   // Dispatch directly to Emscripten's html5.h API:
   if (testUsesEmscriptenHTML5API && typeof JSEvents !== 'undefined' && JSEvents.eventHandlers && JSEvents.eventHandlers.length > 0) {

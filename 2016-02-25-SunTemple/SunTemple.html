@@ -260,7 +260,7 @@ function isBrowser64Bit()  {
 
 // generated from game.template
 // note: Packaging process looks at HTML5Engine.ini to pick up values. 
-var TOTAL_GAME_MEMORY = 1073741824;
+var TOTAL_GAME_MEMORY = (256+64)*1024*1024;
 
 // check max memory usage, we need to clamp it down for 32 bit browsers. 
 if (!isBrowser64Bit()) { 
@@ -328,15 +328,15 @@ window.onerror  = function(msg, url, line, column, error) {
 };
 
 function preInitEmscripten(){
-	
+	console.log('preInitEmscripten');
 	// add canvas but to the dom but don't show it yet. 
 	$ ('<canvas>').
 			attr({
 				id : "canvas",
 				class: "emscripten",
 				oncontextmenu : "event.preventDefault()",
-				height: 904,
-				width: 1600, 
+				height: 768,
+				width: 1366, 
 			}).appendTo('#mainarea').hide(); 
 
 	// setup emscripten's canvas. 
@@ -354,6 +354,18 @@ function postRunEmscripten() {
 	// it still takes couple of ticks after run before anything can be drawn. show the canvas at the last possible moment. 
 	$("#canvas").show(); 
 	window.dispatchEvent(new Event('resize'));
+
+	function forceCanvasSize() {
+		var c = document.getElementById('canvas');
+		if (c) {
+			if (c.width != 1366) c.width = 1366;
+			if (c.height != 768) c.height = 768;
+			if (c.style.width != '1366px') c.style.width = '1366px';
+			if (c.style.height != '768px') c.style.height = '768px';
+		}
+		requestAnimationFrame(forceCanvasSize);
+	}
+	forceCanvasSize();
 }
 
 // create a deffered object for the data file. 
@@ -362,7 +374,7 @@ var dataFileDeferredObject = new $.Deferred();
 // main emscripten module.
 var Module = {
 
-		preInit: [preInitEmscripten], 
+		preInit: [], 
 		preRun: [preRunEmscripten],
 		postRun: [postRunEmscripten],
 
@@ -430,6 +442,28 @@ var Module = {
 		}
     };
 
+</script>
+
+<div class="wrapper" id= "mainarea">
+      <div class="progress centered-axis-xy" id = "progressbar">
+        <div  class="progress-bar progress-bar-custom" 
+              role="progressbar" 
+              aria-valuenow="0" 
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="width: 0%; "
+              >
+        </div>
+      </div>
+ </div>
+
+ <script>
+ preInitEmscripten();
+ </script>
+<script src='../emtimer.js'></script>
+<script src='inputstream.js'></script>
+
+<script>
 $(document).ready(function() {
 
 	// check for webgl. 
@@ -481,20 +515,8 @@ $(document).ready(function() {
 
 </script>
 
-<div class="wrapper" id= "mainarea">
-      <div class="progress centered-axis-xy" id = "progressbar">
-        <div  class="progress-bar progress-bar-custom" 
-              role="progressbar" 
-              aria-valuenow="0" 
-              aria-valuemin="0"
-              aria-valuemax="100"
-              style="width: 0%; "
-              >
-        </div>
-      </div>
- </div>
 </div>
-	<div class="row buttonarea text-center" id="buttonrow">
+	<div class="row buttonarea text-center" id="buttonrow" style='display:none;'>
 		<div class="col-sm-2 text-center"></div>
 		<div class="col-sm-2 text-center"><button type="button" class="btn btn-primary" onclick="Module['pauseMainLoop']();"  >Pause</button></div>
 		<div class="col-sm-2 text-center"><button type="button" class="btn btn-primary" onclick="Module['resumeMainLoop']();" >Resume</button></div>
@@ -502,7 +524,7 @@ $(document).ready(function() {
 		<div class="col-sm-2 text-center"><button type="button" class="btn btn-primary"  id="fullscreen_request" >FullScreen</button></div>
 		<div class="col-sm-2 text-center"></div>
  	</div>
-<div class="texthalf text-normal jumbotron " id="logwindow"></div>
+<div class="texthalf text-normal jumbotron " id="logwindow" style='display:none;'></div>
 </div>
 </body>
 </html>
