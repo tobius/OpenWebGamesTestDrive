@@ -89,7 +89,15 @@ if (injectingInputStream || recordingInputStream) {
     window.alert = function(msg) { console.error('window.alert(' + msg + ')'); }
     window.confirm = function(msg) { console.error('window.confirm(' + msg + ')'); return true; }
   }
+
+  // Replace Math.random() Custom LCG to be able to deterministically seed the random number generator.
+  var randomState = 1;
+  Math.random = function() {
+    randomState = (((((1103515245 * randomState)>>>0) + 12345) >>> 0) % 0x80000000)>>>0;
+    return randomState / 0x80000000;
+  }
 }
+
 
 // XHRs in the expected render output image, always 'reference.png' in the root directory of the test.
 function loadReferenceImage() {
@@ -108,15 +116,16 @@ function loadReferenceImage() {
 
 // Performs the per-pixel rendering comparison test.
 function doReferenceTest() {
-  var ctx;
+  var canvas;
   // Find Emscripten-specific location of the GL context that the page has been rendering to.
-  if (typeof GLctx !== 'undefined') ctx = GLctx;
-  else if (Module.ctx) ctx = Module.ctx;
-  else ctx = Module['canvas'].getContext('webgl');
+  if (typeof GLctx !== 'undefined') GLctx.canvas;
+  else if (Module.ctx) canvas = Module.ctx.canvas;
+  else if (Module['canvas']) canvas = Module['canvas'];
+  else throw 'Cannot find application canvas!';
 
   // Grab rendered WebGL front buffer image to a JS-side image object.
   var actualImage = new Image();
-  actualImage.src = ctx.canvas.toDataURL();
+  actualImage.src = canvas.toDataURL();
   actualImage.onload = function() {
     var img = Module['referenceImage'];
     var div = document.createElement('div');
@@ -186,9 +195,11 @@ function doReferenceTest() {
     }
   }
 
-  // Emscripten-specific: stop rendering the page further.  
-  Browser.mainLoop.pause();
-  Browser.mainLoop.func = null;
+  // Emscripten-specific: stop rendering the page further.
+  if (typeof Browser !== 'undefined' && Browser.mainLoop) {
+    Browser.mainLoop.pause();
+    Browser.mainLoop.func = null;
+  }
 }
 
 // eventType: "mousemove", "mousedown" or "mouseup".
@@ -259,6 +270,13 @@ function simulateKeyEvent(eventType, keyCode, charCode) {
     // Dispatch to browser for real
     Module['canvas'].dispatchEvent ? Module['canvas'].dispatchEvent(e) : Module['canvas'].fireEvent("on" + eventType, e); 
   }
+}
+
+var Module;
+if (typeof Module === 'undefined') {
+  Module = {
+    canvas: document.getElementsByTagName('canvas')[0]
+  };
 }
 
 // Wallclock time for when we started CPU execution of the current frame.
