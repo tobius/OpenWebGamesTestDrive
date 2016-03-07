@@ -279,6 +279,21 @@ if (typeof Module === 'undefined') {
   };
 }
 
+if (injectingInputStream) {
+  // Filter the page event handlers to only pass programmatically generated events to the site - all real user input needs to be discarded since we are
+  // doing a programmatic run.
+  var overriddenMessageTypes = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'keydown', 'keyup', 'pointerlockchange', 'pointerlockerror', 'webkitpointerlockchange', 'webkitpointerlockerror', 'mozpointerlockchange', 'mozpointerlockerror', 'mspointerlockchange', 'mspointerlockerror', 'opointerlockchange', 'opointerlockerror'];
+  var realAddEventListener = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, listener, useCapture) {
+    if (overriddenMessageTypes.indexOf(type) != -1) {
+      // if e.isTrusted is true, then the input comes from human interaction, if false, then it was programmatically generated.
+      realAddEventListener.call(this, type, function(e) { if (!e.isTrusted) listener(e); }, useCapture);
+    } else {
+      realAddEventListener.call(this, type, listener, useCapture);
+    }
+  }
+}
+
 // Wallclock time for when we started CPU execution of the current frame.
 var referenceTestT0 = 0;
 
