@@ -118,7 +118,7 @@ function loadReferenceImage() {
 function doReferenceTest() {
   var canvas;
   // Find Emscripten-specific location of the GL context that the page has been rendering to.
-  if (typeof GLctx !== 'undefined') GLctx.canvas;
+  if (typeof GLctx !== 'undefined') canvas = GLctx.canvas;
   else if (Module.ctx) canvas = Module.ctx.canvas;
   else if (Module['canvas']) canvas = Module['canvas'];
   else throw 'Cannot find application canvas!';
