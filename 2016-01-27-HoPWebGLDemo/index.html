@@ -110,48 +110,130 @@
   Module.setStatus('Downloading (0.0/1)');
 </script>
 <script src="../emtimer.js"></script>
+
+<script>
+
+// This is in a temp location. This would be done by the calling iframe.
+var preloadableAssets = [
+  'Release/HoPDemo.data',
+  'Release/HoPDemo.html.mem',
+  'AssetBundles/WebGL/BundlesInfo.json',
+  'AssetBundles/WebGL/Common.unity3d',
+  'AssetBundles/WebGL/UI.unity3d',
+  'AssetBundles/WebGL/BehaviorTrees.unity3d',
+  'AssetBundles/WebGL/ObjectsData.unity3d',
+  'AssetBundles/WebGL/PlayersMaps.unity3d',
+  'AssetBundles/WebGL/PvPProgress.unity3d',
+  'AssetBundles/WebGL/Runes.unity3d',
+  'AssetBundles/WebGL/Tutorial.unity3d',
+  'AssetBundles/WebGL/Music.unity3d',
+  'AssetBundles/WebGL/EnvDefault.unity3d',
+  'AssetBundles/WebGL/Castle.unity3d',
+  'AssetBundles/WebGL/GoldContainer.unity3d',
+  'AssetBundles/WebGL/InfantryCamp.unity3d',
+  'AssetBundles/WebGL/ElixirFactory.unity3d',
+  'AssetBundles/WebGL/GoldFactory.unity3d',
+  'AssetBundles/WebGL/ElixirContainer.unity3d',
+  'AssetBundles/WebGL/Crossbow.unity3d',
+  'AssetBundles/WebGL/MagicSchool.unity3d',
+  'AssetBundles/WebGL/Bunker.unity3d',
+  'AssetBundles/WebGL/Walls_7-8.unity3d',
+  'AssetBundles/WebGL/Walls_6.unity3d',
+  'AssetBundles/WebGL/ArmySchol.unity3d',
+  'AssetBundles/WebGL/RuneLab.unity3d',
+  'AssetBundles/WebGL/Traps.unity3d',
+  'AssetBundles/WebGL/SplashTowerNew.unity3d',
+  'AssetBundles/WebGL/AnimalTrainer.unity3d',
+  'AssetBundles/WebGL/MachineFactory.unity3d',
+  'AssetBundles/WebGL/AntiAir.unity3d',
+  'AssetBundles/WebGL/MachineGun.unity3d',
+  'AssetBundles/WebGL/BigCannon.unity3d',
+  'AssetBundles/WebGL/Props.unity3d',
+  'AssetBundles/WebGL/BatZooka.unity3d',
+  'AssetBundles/WebGL/Dwarf.unity3d',
+  'AssetBundles/WebGL/Warrior_new.unity3d',
+  'AssetBundles/WebGL/Knight_new.unity3d',
+  'AssetBundles/WebGL/DragonRaider.unity3d',
+  'AssetBundles/WebGL/SpecialEffects.unity3d',
+  'AssetBundles/WebGL/Scafold.unity3d'];
+
+for(var i in preloadableAssets) preloadXHR(preloadableAssets[i], 'arraybuffer');
+preloadXHR('Release/HoPDemo.js');
+
+</script>
+
 <script src="inputstream.js"></script>
 <script src="Release/UnityConfig.js"></script>
-<script src="Release/fileloader.js"></script>
-<script>if (!(!Math.fround)) {
-  var script = document.createElement('script');
-  script.src = "Release/HoPDemo.js";
-  document.body.appendChild(script);
-} else {
-  var codeXHR = new XMLHttpRequest();
-  codeXHR.open('GET', 'Release/HoPDemo.js', true);
-  codeXHR.onload = function() {
-    var code = codeXHR.responseText;
-    if (!Math.fround) { 
-try {
-  console.log('optimizing out Math.fround calls');
-  var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
-  var minified = m[1];
-  if (!minified) throw 'fail';
-  var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
-  var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
-  var asm = code.substring(startAsm, endAsm);
-  do {
-    var moar = false; // we need to re-do, as x(x( will not be fixed
-    asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) { moar = true; return s[0] + '(' });
-  } while (moar);
-  code = code.substring(0, startAsm) + asm + code.substring(endAsm);
-  code = code.replace("'use asm'", "'almost asm'");
-} catch(e) { console.log('failed to optimize out Math.fround calls ' + e) }
- }
+<script>
 
-    var blob = new Blob([code], { type: 'text/javascript' });
-    codeXHR = null;
-    var src = URL.createObjectURL(blob);
-    var script = document.createElement('script');
-    script.src = URL.createObjectURL(blob);
-    script.onload = function() {
-      URL.revokeObjectURL(script.src);
-    };
-    document.body.appendChild(script);
-  };
-  codeXHR.send(null);
+function appendScript(src) {
+  var script = document.createElement('script');
+  script.src = src;
+  document.body.appendChild(script);
 }
+
+// Kicks off the actual page run
+function runPage() {
+  appendScript('Release/fileloader.js');
+
+  if (!(!Math.fround)) {
+    var codeXHR = new XMLHttpRequest();
+    codeXHR.open('GET', 'Release/HoPDemo.js', true);
+    codeXHR.onload = function() {
+      var code = codeXHR.responseText;
+      var blob = new Blob([code], { type: 'text/javascript' });
+      codeXHR = null;
+      var src = URL.createObjectURL(blob);
+      var script = document.createElement('script');
+      script.src = URL.createObjectURL(blob);
+      script.onload = function() {
+        URL.revokeObjectURL(script.src);
+      };
+      document.body.appendChild(script);
+    };
+    codeXHR.send(null);
+
+  } else {
+    var codeXHR = new XMLHttpRequest();
+    codeXHR.open('GET', 'Release/HoPDemo.js', true);
+    codeXHR.onload = function() {
+      var code = codeXHR.responseText;
+      if (!Math.fround) { 
+  try {
+    console.log('optimizing out Math.fround calls');
+    var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
+    var minified = m[1];
+    if (!minified) throw 'fail';
+    var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
+    var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
+    var asm = code.substring(startAsm, endAsm);
+    do {
+      var moar = false; // we need to re-do, as x(x( will not be fixed
+      asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) { moar = true; return s[0] + '(' });
+    } while (moar);
+    code = code.substring(0, startAsm) + asm + code.substring(endAsm);
+    code = code.replace("'use asm'", "'almost asm'");
+  } catch(e) { console.log('failed to optimize out Math.fround calls ' + e) }
+   }
+
+      var blob = new Blob([code], { type: 'text/javascript' });
+      codeXHR = null;
+      var src = URL.createObjectURL(blob);
+      var script = document.createElement('script');
+      script.src = URL.createObjectURL(blob);
+      script.onload = function() {
+        URL.revokeObjectURL(script.src);
+      };
+      document.body.appendChild(script);
+    };
+    codeXHR.send(null);
+  }
+}
+
+// The page won't start executing the Emscripten/asm.js content until it gets the 'preloadXHRsfinished' message
+// and the preloadedXHRs array has been populated with cached content. Set up a listener to wait until that's done.
+window.addEventListener("message", function(e) { if (e.data == 'preloadXHRsfinished') runPage(); }, false);
+
 </script>
 </body>
 <script>

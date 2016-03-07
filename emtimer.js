@@ -98,6 +98,80 @@ if (injectingInputStream || recordingInputStream) {
   }
 }
 
+var realXMLHttpRequest = XMLHttpRequest;
+
+// dictionary with 'responseType|url' -> finished XHR object mappings.
+var preloadedXHRs = {};
+var numXHRsStillInFlight = 0;
+
+// E.g. use the following function to load one by one (or do it somewhere else and set preloadedXHRs object)
+function preloadXHR(url, responseType, onload) {
+  var xhr = new realXMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.responseType = responseType;
+  xhr.onload = function() {
+    console.log('preloaded XHR ' + url + ' finished!');
+    preloadedXHRs[responseType + '|' + url] = xhr;
+    if (onload) onload(xhr);
+    // Once all XHRs are finished, trigger the page to start running.
+    if (--numXHRsStillInFlight == 0) {
+      console.log('All XHRs finished!');
+      window.postMessage('preloadXHRsfinished', '*');
+    }
+  }
+  ++numXHRsStillInFlight;
+  xhr.send();
+}
+
+// Hook into XMLHTTPRequest to be able to submit preloaded requests.
+XMLHttpRequest = function() {}
+XMLHttpRequest.prototype = {
+  open: function(method, url, async) {
+    // Don't yet do anything except store the params, since we don't know
+    // whether we need to open a real XHR, or if we have a cached one waiting
+    // (need the .responseType field for this)
+    this.url_ = url;
+    this.method_ = method;
+    this.async_ = async;
+  },
+
+  send: function(data) {
+    var this_ = this;
+    var xhrKey = this_.responseType_ + '|' + this_.url_;
+    this_.xhr_ = preloadedXHRs[xhrKey];
+    if (this.xhr_) {
+      // This particular XHR URL has been downloaded up front. Serve the preloaded one.
+      setTimeout(function() {
+        if (this_.onload) this_.onload();
+
+        // Free up reference to this XHR to not leave behind used memory.
+        delete preloadedXHRs[xhrKey];
+      }, 1);      
+    } else {
+      // The XHR has not been cached up in advance. Log a trace and do it now on demand.
+      console.log('Expected XHR of ' + this.url_ + ' with response type ' + this.responseType_ + ' to have been cached up front!');
+      this.xhr_ = new realXMLHttpRequest();
+      this.xhr_.responseType = this.responseType_;
+      this.xhr_.open(this_.method_, this_.url_, this_.async_);
+      this.xhr_.onload = function() {
+        if (this_.onload) this_.onload();
+      }
+      this.xhr_.send();
+    }
+  },
+
+  getAllResponseHeaders: function() { return this.xhr_.getAllResponseHeaders(); },
+  setRequestHeader: function(h, v) { },
+  addEventListener: function(s, f) { console.log(s); },
+  get response() { return this.xhr_.response; },
+  get responseText() { return this.xhr_.responseText; },
+  get responseXML() { return this.xhr_.responseXML; },
+  get responseType() { return this.responseType_; },
+  set responseType(x) { this.responseType_ = x; },
+  get status() { return this.xhr_.status; },
+  get statusText() { return this.xhr_.statusText; },
+  get timeout() { return this.xhr_.timeout; }
+};
 
 // XHRs in the expected render output image, always 'reference.png' in the root directory of the test.
 function loadReferenceImage() {
